@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GhostFiles · professional suite · RUDRA TRIVEDI</title>
-  <!-- clean white & professional, with sharp engineering & full responsiveness -->
+  <!-- clean white & professional, sharp engineering, fully responsive, English only -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 (free) for warning icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
       margin: 0;
@@ -172,7 +174,7 @@
       box-shadow: 0 25px 35px -12px #0a2c4e;
     }
 
-    /* video embed — responsive border, fluid ratio */
+    /* video embed — responsive border, fluid ratio, kept for future */
     .video-frame {
       background: var(--surface-light);
       border-radius: 32px;
@@ -239,7 +241,7 @@
       line-height: 1.6;
     }
 
-    /* warning zone — red/white, responsive padding */
+    /* warning zone — red/white, responsive padding, with font awesome icon */
     .warning-panel {
       background: #fff9f9;
       border: 2px solid var(--danger-flag);
@@ -255,17 +257,17 @@
       font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 30px;
       flex-wrap: wrap;
     }
 
-    .warning-panel h2 span {
+    .warning-panel h2 i {
+      font-size: 2rem;
       background: var(--danger-bg);
-      padding: 5px 18px;
-      border-radius: 60px;
-      font-size: 1.3rem;
-      white-space: nowrap;
+      padding: 10px;
+      border-radius: 50%;
+      color: var(--danger-flag);
     }
 
     .warning-text {
@@ -447,8 +449,9 @@
         padding: 16px 22px;
         width: 100%;
       }
-      .warning-panel h2 span {
-        font-size: 1rem;
+      .warning-panel h2 i {
+        font-size: 1.6rem;
+        padding: 6px;
       }
       .badge-row span {
         width: 100%;
@@ -486,8 +489,11 @@
     <div style="color: var(--text-light); font-size: 0.9rem; margin-top: 10px;">version 1.0 • signed by Rudra Trivedi</div>
   </section>
 
+  <!-- video placeholder – kept for future integration -->
   <div class="video-frame">
-   
+    <div class="main-video" style="display: flex; align-items: center; justify-content: center; background: #eef2f6; color: var(--text-light); font-size: 1.2rem;">
+      <span style="opacity: 0.7;">🎥 Video preview (to be added)</span>
+    </div>
   </div>
 
   <div class="cards-grid">
@@ -495,32 +501,34 @@
       <div class="card-number">01</div>
       <div class="card-title">Master EXE</div>
       <div class="card-desc">
-        <strong>Pehla suraksha layer</strong> — Bina main password ke software open nahi hoga. AES‑256-GCM + Argon2id key derivation. Zero password recovery.
+        <strong>First security layer</strong> — Without the master password, the software will not open. AES‑256-GCM + Argon2id key derivation. Zero password recovery.
       </div>
     </div>
     <div class="feature-card">
       <div class="card-number">02</div>
       <div class="card-title">File Vault</div>
       <div class="card-desc">
-        <strong>Har document alag encrypted hash</strong> — Bina second key ke file decode impossible. Per‑file ephemeral keys.
+        <strong>Each document separately encrypted</strong> — Without the second key, file decryption is impossible. Per‑file ephemeral keys.
       </div>
     </div>
     <div class="feature-card">
       <div class="card-number">03</div>
       <div class="card-title">Write‑Over</div>
       <div class="card-desc">
-        <strong>Anti‑recovery logic</strong> — GhostFiles data ko "write‑over" method se encrypt karta hai. Koy bhi recovery software ise wapas nahi la sakta.
+        <strong>Anti‑recovery logic</strong> — GhostFiles encrypts data using the "write‑over" method. No recovery software can restore it.
       </div>
     </div>
   </div>
 
   <div class="warning-panel">
-    <h2><span>⚠️</span> PERMANENT DATA LOSS WARNING</h2>
+    <h2>
+      <i class="fas fa-exclamation-triangle"></i> PERMANENT DATA LOSS WARNING
+    </h2>
     <div class="warning-text">
-      Agar aap apna Master Password bhool jate hain, toh data recover karne ka koy rasta nahi hai.
+      If you forget your Master Password, there is no way to recover the data.
     </div>
     <p style="color: var(--text-medium); font-size: 1.05rem; margin: 25px 0;">
-      Hamari Privacy Policy aur T&C ke mutabiq, GhostFiles aapka password kahi bhi save nahi karta. Galat password ya bhulne ki surat me data hamesha ke liye delete (corrupt) ho jayega.
+      According to our Privacy Policy and T&C, GhostFiles does not store your password anywhere. In case of incorrect password or memory loss, the data will be permanently deleted (corrupted).
     </p>
     <div class="small-print">
       ✦ This is a feature, not a bug. No recovery possible — even by the developer ✦
