@@ -47,6 +47,42 @@
       padding: 0 32px;
     }
 
+/* Remove blue select/outline from buttons and all interactive elements */
+button,
+.button,
+.cta-professional,
+a,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove focus ring for mouse users, keep for keyboard accessibility */
+button:focus:not(:focus-visible),
+.cta-professional:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Optional: keep a subtle indicator for keyboard navigation (accessibility) */
+button:focus-visible,
+.cta-professional:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
     /* navigation — pure white, subtle elegance, fully responsive */
     .navbar {
       display: flex;
