@@ -1,26 +1,909 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Snake Game</title>
-	<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Snake OS - Ultimate Premium Console</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #060813;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-solid: #0d1222;
+            --border-ui: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #64748b;
+            --accent-neon: #00ff9d;
+            --accent-danger: #ff3366;
+            --accent-blue: #00e5ff;
+        }
+
+        /* 100% STRICT POINTER-EVENTS & FLASH PROTECTION */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #app-shell {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0 0 env(safe-area-inset-bottom) 0;
+        }
+
+        /* TOP BAR PERFECTLY ADJUSTED DESIGN */
+        #app-top-widget {
+            width: 100%;
+            padding: calc(env(safe-area-inset-top) + 14px) 20px 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(5,7,12,0.95) 60%, rgba(5,7,12,0));
+            z-index: 5;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .score-box-fixed {
+            display: flex;
+            gap: 10px;
+        }
+
+        .premium-badge {
+            background: var(--surface);
+            border: 1px solid var(--border-ui);
+            padding: 8px 14px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .widget-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-widget-btn {
+            background: var(--surface);
+            border: 1px solid var(--border-ui);
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .icon-widget-btn:active {
+            transform: scale(0.88);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Viewport Canvas Frame Layout */
+        #viewport-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* IMMERSIVE FULL-PAGE SCREEN NAVIGATION INTERFACES */
+        .full-screen-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #0e1425 0%, #04060b 100%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .full-screen-view.hidden {
+            opacity: 0;
+            transform: scale(1.04);
+            pointer-events: none;
+        }
+
+        .premium-app-logo {
+            font-size: 5.5rem;
+            margin-bottom: 24px;
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0,255,157,0.2)); }
+            50% { transform: scale(1.03); filter: drop-shadow(0 0 30px rgba(0,255,157,0.45)); }
+        }
+
+        .app-view-title {
+            font-size: 2.6rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #ffffff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-view-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            max-width: 320px;
+            line-height: 1.6;
+        }
+
+        /* HARD-CORE INTERACTIVE APP ANALYTICS NODES */
+        .analytics-dashboard-grid {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-ui);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 340px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 20px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+        }
+
+        .analytics-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .tile-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .tile-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        /* LIQUID CONSOLE ACTION TRIGGERS */
+        .primary-action-launcher {
+            background: var(--text-main);
+            color: var(--bg-dark);
+            border: none;
+            padding: 18px 48px;
+            border-radius: 32px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 16px 35px rgba(255, 255, 255, 0.12);
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .primary-action-launcher:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
+        }
+
+        /* ADVANCED ZERO-SCROLL STUDIO LAYOUT */
+        #screen-customizer {
+            justify-content: flex-start;
+            padding: calc(env(safe-area-inset-top) + 20px) 24px 24px 24px;
+            background: #070a14;
+        }
+
+        .panel-widget-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        /* ADVANCED NO-SCROLL TRIPLE SEGMENT TABS */
+        .studio-tab-bar {
+            width: 100%;
+            display: flex;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-ui);
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+        }
+
+        .studio-tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 12px 0;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .studio-tab-btn.active {
+            background: var(--surface-solid);
+            color: var(--text-main);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        /* CONTENT CONTAINER PANEL */
+        .studio-content-pane {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .studio-content-pane.active {
+            display: flex;
+        }
+
+        .options-matrix-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .custom-card-option {
+            background: var(--surface-solid);
+            border: 2px solid var(--border-ui);
+            border-radius: 20px;
+            padding: 20px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .custom-card-option.active {
+            border-color: var(--accent-neon);
+            background: rgba(0, 255, 157, 0.04);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.15);
+        }
+
+        .color-node-preview {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+
+        .upload-dashed-box {
+            width: 100%;
+            background: var(--surface-solid);
+            border: 2px dashed var(--border-ui);
+            border-radius: 20px;
+            padding: 26px 20px;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
 </head>
 <body>
-	<div id="game-container">
-		<canvas id="gc" class="game-canvas" width="400" height="400"></canvas>
-	</div>
-	<div class="keys">
-	  <a class="up arr" onclick="Snake.action('up')">
-	    <i class="chevron up"></i></a>
-	  <br />
-	  <a class="left arr" onclick="Snake.action('left')">
-	    <i class="chevron left"></i></a>
-	  <a class="down arr" onclick="Snake.action('down')">
-	    <i class="chevron down"></i></a>
-	  <a class="right arr" onclick="Snake.action('right')">
-	    <i class="chevron right"></i></a>
-	</div>
-	<script type="text/javascript" src="game.js"></script>
+
+<div id="app-shell">
+    <div id="app-top-widget">
+        <div class="score-box-fixed">
+            <div class="premium-badge" style="color: var(--accent-neon); border-color: rgba(0,255,157,0.18);"><i data-lucide="trophy" style="width:14px;"></i> <span id="score-val">0</span></div>
+            <div class="premium-badge" style="color: #ffaa00; border-color: rgba(255,170,0,0.12);"><i data-lucide="zap" style="width:14px;"></i> <span id="best-val">0</span></div>
+        </div>
+        
+        <div class="widget-actions">
+            <button class="icon-widget-btn" onclick="openCustomizer()"><i data-lucide="palette" style="width: 18px; color: var(--accent-blue);"></i></button>
+            <button class="icon-widget-btn" onclick="triggerPause()"><i data-lucide="pause" style="width: 18px;"></i></button>
+            <button class="icon-widget-btn" onclick="forceReset()"><i data-lucide="rotate-ccw" style="width: 18px;"></i></button>
+        </div>
+    </div>
+
+    <div id="viewport-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div id="screen-start" class="full-screen-view">
+        <div class="premium-app-logo">🐍</div>
+        <h1 class="app-view-title">SNAKE SIMULATOR</h1>
+        <p class="app-view-subtitle">High-fidelity biome ecosystem loop. Powered by dynamic circular node physics.</p>
+        <button class="primary-action-launcher" onclick="initAudioAndPlay()">LAUNCH SYSTEM <i data-lucide="play" style="width:18px; fill:currentColor;"></i></button>
+    </div>
+
+    <div id="screen-pause" class="full-screen-view hidden" style="background: rgba(4,6,11,0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);">
+        <div style="font-size: 4rem; margin-bottom: 20px; color: var(--accent-blue);"><i data-lucide="pause-circle" style="width:64px; height:64px;"></i></div>
+        <h1 class="app-view-title">CORE SUSPENDED</h1>
+        <p class="app-view-subtitle">Simulation algorithms frozen safely on current memory block cluster.</p>
+        
+        <div class="analytics-dashboard-grid">
+            <div class="analytics-tile">
+                <span class="tile-label">Current</span>
+                <span id="pause-score-data" class="tile-value" style="color: var(--accent-blue);">0</span>
+            </div>
+            <div class="analytics-tile">
+                <span class="tile-label">High Score</span>
+                <span id="pause-best-data" class="tile-value">0</span>
+            </div>
+        </div>
+
+        <button class="primary-action-launcher" style="background: var(--accent-blue); box-shadow: 0 15px 30px rgba(0,229,255,0.25);" onclick="changeState('PLAYING')">RESUME SIMULATOR</button>
+    </div>
+
+    <div id="screen-over" class="full-screen-view hidden">
+        <div style="font-size: 4.5rem; margin-bottom: 20px; color: var(--accent-danger); filter: drop-shadow(0 0 25px rgba(255,51,102,0.35));"><i data-lucide="skull" style="width:64px; height:64px;"></i></div>
+        <h1 class="app-view-title" style="background: linear-gradient(180deg, #ff4d4d 0%, #b3002d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">BIOMASS CRASHED</h1>
+        <p class="app-view-subtitle">Structural coordinates breached linear grid bounding limits.</p>
+        
+        <div class="analytics-dashboard-grid" style="border-color: rgba(255,51,102,0.25); background: rgba(255,51,102,0.02);">
+            <div class="analytics-tile">
+                <span class="tile-label">Final Score</span>
+                <span id="over-score-data" class="tile-value" style="color: var(--accent-danger);">0</span>
+            </div>
+            <div class="analytics-tile">
+                <span class="tile-label">Top Record</span>
+                <span id="over-best-data" class="tile-value">0</span>
+            </div>
+        </div>
+
+        <button class="primary-action-launcher" onclick="changeState('PLAYING')">REBOOT ENGINE <i data-lucide="refresh-cw" style="width:18px;"></i></button>
+    </div>
+
+    <div id="screen-customizer" class="full-screen-view hidden">
+        <div class="panel-widget-header">
+            <h2 style="font-weight: 900; letter-spacing: -0.02em; font-size: 1.5rem;">STUDIO INTERFACE</h2>
+            <button class="icon-widget-btn" onclick="closeCustomizer()"><i data-lucide="x" style="width: 20px;"></i></button>
+        </div>
+
+        <div class="studio-tab-bar">
+            <button id="tab-btn-skins" class="studio-tab-btn active" onclick="switchStudioTab('skins')">Skins</button>
+            <button id="tab-btn-food" class="studio-tab-btn" onclick="switchStudioTab('food')">Ecosystem</button>
+            <button id="tab-btn-bg" class="studio-tab-btn" onclick="switchStudioTab('bg')">Grid Setup</button>
+        </div>
+
+        <div id="pane-skins" class="studio-content-pane active">
+            <div class="options-matrix-grid">
+                <div id="skin-opt-0" class="custom-card-option active" onclick="setSkinTheme(0)">
+                    <div class="color-node-preview" style="background: var(--accent-neon);"></div>
+                    <span>Neon Link</span>
+                </div>
+                <div id="skin-opt-1" class="custom-card-option" onclick="setSkinTheme(1)">
+                    <div class="color-node-preview" style="background: #bf55ec;"></div>
+                    <span>Cyber Void</span>
+                </div>
+                <div id="skin-opt-2" class="custom-card-option" onclick="setSkinTheme(2)">
+                    <div class="color-node-preview" style="background: #ffaa00;"></div>
+                    <span>Solid Gold</span>
+                </div>
+                <div id="skin-opt-3" class="custom-card-option" onclick="setSkinTheme(3)">
+                    <div class="color-node-preview" style="background: linear-gradient(45deg, #ff0055, #00e5ff);"></div>
+                    <span>Matrix Wave</span>
+                </div>
+            </div>
+            
+            <div class="upload-dashed-box" onclick="document.getElementById('img-uploader').click()">
+                <i data-lucide="image-plus" style="width: 28px; color: var(--text-muted);"></i>
+                <p style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Upload Image to Wrap Snake Nodes</p>
+                <input type="file" id="img-uploader" accept="image/*" style="display: none;" onchange="processSnakeImage(event)">
+            </div>
+        </div>
+
+        <div id="pane-food" class="studio-content-pane">
+            <div class="options-matrix-grid">
+                <div id="food-opt-0" class="custom-card-option active" onclick="setFoodTheme(0)">
+                    <span style="font-size: 1.2rem; color: #ff3366; font-weight: 800;">⚡ ORB</span>
+                    <span>Neon Core</span>
+                </div>
+                <div id="food-opt-1" class="custom-card-option" onclick="setFoodTheme(1)">
+                    <span style="font-size: 1.2rem; color: #bf55ec; font-weight: 800;">🛸 MESH</span>
+                    <span>Bio Shard</span>
+                </div>
+                <div id="food-opt-2" class="custom-card-option" onclick="setFoodTheme(2)">
+                    <span style="font-size: 1.2rem; color: #00e5ff; font-weight: 800;">👾 PIX</span>
+                    <span>Retro Matrix</span>
+                </div>
+                <div id="food-opt-3" class="custom-card-option" onclick="setFoodTheme(3)">
+                    <span style="font-size: 1.2rem; color: var(--accent-neon); font-weight: 800;">🔄 LOOP</span>
+                    <span>Dynamic Mix</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="pane-bg" class="studio-content-pane">
+            <div class="options-matrix-grid">
+                <div id="bg-opt-0" class="custom-card-option active" onclick="setBackgroundTheme(0)">
+                    <div class="color-node-preview" style="background: #05070c; border: 1px solid var(--border-ui);"></div>
+                    <span>Space Void</span>
+                </div>
+                <div id="bg-opt-1" class="custom-card-option" onclick="setBackgroundTheme(1)">
+                    <div class="color-node-preview" style="background: #021a0e; border: 1px solid var(--border-ui);"></div>
+                    <span>Matrix Cyber</span>
+                </div>
+                <div id="bg-opt-2" class="custom-card-option" onclick="setBackgroundTheme(2)">
+                    <div class="color-node-preview" style="background: #020f1a; border: 1px solid var(--border-ui);"></div>
+                    <span>Deep Ocean</span>
+                </div>
+                <div id="bg-opt-3" class="custom-card-option" onclick="setBackgroundTheme(3)">
+                    <div class="color-node-preview" style="background: #1a0215; border: 1px solid var(--border-ui);"></div>
+                    <span>Sunset Haze</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="primary-action-launcher" style="width: 100%; justify-content: center; margin-top: auto; background: var(--accent-neon);" onclick="closeCustomizer()">SAVE PROPERTIES</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const screens = {
+        START: document.getElementById('screen-start'),
+        PAUSED: document.getElementById('screen-pause'),
+        OVER: document.getElementById('screen-over'),
+        CUSTOMIZER: document.getElementById('screen-customizer')
+    };
+
+    const panes = {
+        skins: document.getElementById('pane-skins'),
+        food: document.getElementById('pane-food'),
+        bg: document.getElementById('pane-bg')
+    };
+
+    const skinsData = [
+        { type: 'color', head: '#00ff9d', body: 'rgba(0, 255, 157, 0.45)' },
+        { type: 'color', head: '#bf55ec', body: 'rgba(191, 85, 236, 0.45)' },
+        { type: 'color', head: '#ffaa00', body: 'rgba(255, 170, 0, 0.45)' },
+        { type: 'gradient', head: '#ff0055', body: '#00e5ff' }
+    ];
+
+    const foodThemesData = [
+        { type: 'neon-orb', primaryColor: '#ff3366', secondaryColor: '#ff7675' },
+        { type: 'bio-shard', primaryColor: '#bf55ec', secondaryColor: '#e0b0ff' },
+        { type: 'retro-matrix', primaryColor: '#00e5ff', secondaryColor: '#00a8ff' }
+    ];
+
+    const bgColorsData = [
+        '#05070c', // Space Void
+        '#021a0e', // Matrix Cyber
+        '#020f1a', // Deep Ocean
+        '#1a0215'  // Sunset Haze
+    ];
+
+    let appState = 'START', previousState = 'START';
+    let score = 0, best = localStorage.getItem('studio_snake_best') || 0;
+    let rows, cols, cellWidth, cellHeight;
+    let player = {x: 5, y: 5}, vel = {x: 1, y: 0}, nextVel = {x: 1, y: 0};
+    let trail = [], tail = 5, fruit = {x: 12, y: 10};
+
+    let activeSkinIdx = 0, activeFoodIdx = 0, renderFoodIdx = 0, activeBgIdx = 0;
+    let isDynamicFoodMode = false;
+    let snakeImageNode = null;
+    let pulseDelta = 0;
+
+    /* 🔥 NATIVE WEB AUDIO GENERATOR SYSTEM */
+    let audioCtx = null;
+
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playMoveSound() {
+        if (!audioCtx) return;
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(90, audioCtx.currentTime); // Deep clear bass click
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.06);
+    }
+
+    function playScoreSound() {
+        if (!audioCtx) return;
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, audioCtx.currentTime); // Retro Arcade chime chord
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.16);
+    }
+
+    function playCrashSound() {
+        if (!audioCtx) return;
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, audioCtx.currentTime); // Low metallic explosion impact
+        osc.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+    }
+
+    function initAudioAndPlay() {
+        initAudioContext();
+        changeState('PLAYING');
+    }
+
+    document.getElementById('best-val').innerText = best;
+
+    function resizeViewport() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        cols = 18; 
+        cellWidth = canvas.width / cols;
+        rows = Math.floor(canvas.height / cellWidth);
+        cellHeight = canvas.height / rows;
+    }
+    window.addEventListener('resize', resizeViewport);
+    resizeViewport();
+
+    function changeState(newState) {
+        if(appState !== 'CUSTOMIZER') previousState = appState;
+        appState = newState;
+        Object.values(screens).forEach(scr => scr.classList.add('hidden'));
+        
+        document.getElementById('pause-score-data').innerText = score;
+        document.getElementById('pause-best-data').innerText = best;
+        document.getElementById('over-score-data').innerText = score;
+        document.getElementById('over-best-data').innerText = best;
+
+        if (appState === 'PLAYING') {
+            if(trail.length === 0) setupNewGame();
+        } else if (appState === 'PAUSED') {
+            screens.PAUSED.classList.remove('hidden');
+        } else if (appState === 'OVER') {
+            playCrashSound(); // Trigger system crash sonic impact
+            screens.OVER.classList.remove('hidden');
+            trail = [];
+        } else if (appState === 'START') {
+            screens.START.classList.remove('hidden');
+        } else if (appState === 'CUSTOMIZER') {
+            screens.CUSTOMIZER.classList.remove('hidden');
+        }
+    }
+
+    function openCustomizer() { initAudioContext(); changeState('CUSTOMIZER'); }
+    function closeCustomizer() { changeState(previousState === 'CUSTOMIZER' ? 'START' : previousState); }
+
+    function switchStudioTab(tabKey) {
+        document.querySelectorAll('.studio-tab-btn').forEach(btn => btn.classList.remove('active'));
+        Object.values(panes).forEach(pane => pane.classList.remove('active'));
+        
+        document.getElementById(`tab-btn-${tabKey}`).classList.add('active');
+        panes[tabKey].classList.add('active');
+    }
+
+    function setSkinTheme(idx) {
+        snakeImageNode = null;
+        document.querySelectorAll('#pane-skins .custom-card-option').forEach(el => el.classList.remove('active'));
+        document.getElementById(`skin-opt-${idx}`).classList.add('active');
+        activeSkinIdx = idx;
+    }
+
+    function setFoodTheme(idx) {
+        document.querySelectorAll('#pane-food .custom-card-option').forEach(el => el.classList.remove('active'));
+        document.getElementById(`food-opt-${idx}`).classList.add('active');
+        
+        if(idx === 3) {
+            isDynamicFoodMode = true;
+            shuffleFoodAsset();
+        } else {
+            isDynamicFoodMode = false;
+            activeFoodIdx = idx;
+            renderFoodIdx = idx;
+        }
+    }
+
+    function shuffleFoodAsset() {
+        renderFoodIdx = Math.floor(Math.random() * foodThemesData.length);
+    }
+
+    function setBackgroundTheme(idx) {
+        document.querySelectorAll('#pane-bg .custom-card-option').forEach(el => el.classList.remove('active'));
+        document.getElementById(`bg-opt-${idx}`).classList.add('active');
+        activeBgIdx = idx;
+    }
+
+    function processSnakeImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    snakeImageNode = img;
+                    document.querySelectorAll('#pane-skins .custom-card-option').forEach(el => el.classList.remove('active'));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function triggerPause() {
+        initAudioContext();
+        if(appState === 'PLAYING') changeState('PAUSED');
+        else if(appState === 'PAUSED') changeState('PLAYING');
+    }
+
+    function forceReset() { initAudioContext(); setupNewGame(); changeState('PLAYING'); }
+
+    function setupNewGame() {
+        score = 0; tail = 5; trail = [];
+        player = {x: Math.floor(cols/2), y: Math.floor(rows/2)};
+        vel = {x: 1, y: 0}; nextVel = {x: 1, y: 0};
+        document.getElementById('score-val').innerText = score;
+        spawnFruit();
+    }
+
+    function spawnFruit() {
+        fruit.x = Math.floor(Math.random() * cols);
+        fruit.y = Math.floor(Math.random() * rows);
+        if(isDynamicFoodMode) shuffleFoodAsset();
+    }
+
+    function updatePhysicsEngine() {
+        if (appState !== 'PLAYING') return;
+
+        // Check if movement orientation changes to fire click acoustic feedbacks
+        if(nextVel.x !== vel.x || nextVel.y !== vel.y) {
+            playMoveSound();
+        }
+
+        vel = {...nextVel};
+        player.x += vel.x; player.y += vel.y;
+
+        if(player.x < 0) player.x = cols - 1; if(player.x >= cols) player.x = 0;
+        if(player.y < 0) player.y = rows - 1; if(player.y >= rows) player.y = 0;
+
+        for(let i=0; i<trail.length; i++) {
+            if(trail[i].x === player.x && trail[i].y === player.y) {
+                if(score > best) { best = score; localStorage.setItem('studio_snake_best', best); document.getElementById('best-val').innerText = best; }
+                changeState('OVER'); return;
+            }
+        }
+
+        trail.push({x: player.x, y: player.y});
+        while(trail.length > tail) trail.shift();
+
+        if(player.x === fruit.x && player.y === fruit.y) {
+            tail++; score++;
+            playScoreSound(); // Trigger chimes sound loops
+            document.getElementById('score-val').innerText = score;
+            spawnFruit();
+        }
+    }
+
+    function renderGraphicsEngine() {
+        ctx.fillStyle = bgColorsData[activeBgIdx];
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let skin = skinsData[activeSkinIdx];
+        pulseDelta += 0.12;
+
+        for(let i=0; i<trail.length; i++) {
+            let isHead = (i === trail.length - 1);
+            let rx = trail[i].x * cellWidth;
+            let ry = trail[i].y * cellHeight;
+
+            if(!isHead && !snakeImageNode) {
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = skin.head;
+            }
+
+            if (snakeImageNode) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(rx + cellWidth/2, ry + cellHeight/2, cellWidth/2 - 1, 0, Math.PI*2);
+                ctx.clip();
+                ctx.drawImage(snakeImageNode, rx, ry, cellWidth, cellHeight);
+                ctx.restore();
+            } else {
+                if(skin.type === 'color') {
+                    ctx.fillStyle = isHead ? skin.head : skin.body;
+                } else {
+                    let grad = ctx.createLinearGradient(rx, ry, rx+cellWidth, ry+cellHeight);
+                    grad.addColorStop(0, skin.head); grad.addColorStop(1, skin.body);
+                    ctx.fillStyle = grad;
+                }
+                ctx.beginPath();
+                ctx.arc(rx + cellWidth/2, ry + cellHeight/2, isHead ? (cellWidth/2) : (cellWidth/2) - 1.5, 0, Math.PI*2);
+                ctx.fill();
+            }
+            
+            ctx.shadowBlur = 0;
+
+            if(isHead) {
+                let hx = rx + cellWidth / 2;
+                let hy = ry + cellHeight / 2;
+                let eyeOffset = cellWidth * 0.18;
+                let eyeRadius = cellWidth * 0.09;
+                let pupilRadius = cellWidth * 0.045;
+
+                let leftEye = { x: 0, y: 0 };
+                let rightEye = { x: 0, y: 0 };
+
+                if (vel.x === 1) { 
+                    leftEye  = { x: hx + eyeOffset, y: hy - eyeOffset };
+                    rightEye = { x: hx + eyeOffset, y: hy + eyeOffset };
+                } else if (vel.x === -1) { 
+                    leftEye  = { x: hx - eyeOffset, y: hy + eyeOffset };
+                    rightEye = { x: hx - eyeOffset, y: hy - eyeOffset };
+                } else if (vel.y === -1) { 
+                    leftEye  = { x: hx - eyeOffset, y: hy - eyeOffset };
+                    rightEye = { x: hx + eyeOffset, y: hy - eyeOffset };
+                } else if (vel.y === 1) { 
+                    leftEye  = { x: hx + eyeOffset, y: hy + eyeOffset };
+                    rightEye = { x: hx - eyeOffset, y: hy + eyeOffset };
+                } else { 
+                    leftEye  = { x: hx + eyeOffset, y: hy - eyeOffset };
+                    rightEye = { x: hx + eyeOffset, y: hy + eyeOffset };
+                }
+
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath(); ctx.arc(leftEye.x, leftEye.y, eyeRadius, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(rightEye.x, rightEye.y, eyeRadius, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = "#000000";
+                ctx.beginPath(); ctx.arc(leftEye.x + (vel.x * 1), leftEye.y + (vel.y * 1), pupilRadius, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(rightEye.x + (vel.x * 1), rightEye.y + (vel.y * 1), pupilRadius, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        /* VECTOR GRAPHICS FOOD CORE SHADERS */
+        let fx = (fruit.x * cellWidth) + cellWidth/2;
+        let fy = (fruit.y * cellHeight) + cellHeight/2;
+        let baseRadius = (cellWidth / 2) - 1;
+        let breathingRadius = baseRadius + Math.sin(pulseDelta) * 1.5;
+        let foodTheme = foodThemesData[renderFoodIdx];
+
+        ctx.save();
+        if (foodTheme.type === 'neon-orb') {
+            ctx.shadowBlur = 18 + Math.sin(pulseDelta) * 4;
+            ctx.shadowColor = foodTheme.primaryColor;
+
+            let grad = ctx.createRadialGradient(fx, fy, 1, fx, fy, breathingRadius);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.3, foodTheme.secondaryColor);
+            grad.addColorStop(1, foodTheme.primaryColor);
+
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(fx, fy, breathingRadius, 0, Math.PI * 2); ctx.fill();
+        } 
+        else if (foodTheme.type === 'bio-shard') {
+            ctx.shadowBlur = 14; ctx.shadowColor = foodTheme.primaryColor;
+            ctx.fillStyle = foodTheme.primaryColor;
+            
+            ctx.beginPath();
+            ctx.moveTo(fx, fy - breathingRadius);
+            ctx.lineTo(fx + breathingRadius, fy);
+            ctx.lineTo(fx, fy + breathingRadius);
+            ctx.lineTo(fx - breathingRadius, fy);
+            ctx.closePath(); ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(fx, fy - breathingRadius * 0.4);
+            ctx.lineTo(fx + breathingRadius * 0.4, fy);
+            ctx.lineTo(fx, fy + breathingRadius * 0.4);
+            ctx.lineTo(fx - breathingRadius * 0.4, fy);
+            ctx.closePath(); ctx.fill();
+        } 
+        else if (foodTheme.type === 'retro-matrix') {
+            ctx.shadowBlur = 12; ctx.shadowColor = foodTheme.primaryColor;
+            ctx.strokeStyle = foodTheme.primaryColor; ctx.lineWidth = 2;
+            ctx.strokeRect(fx - breathingRadius + 1, fy - breathingRadius + 1, breathingRadius * 2 - 2, breathingRadius * 2 - 2);
+
+            ctx.fillStyle = foodTheme.secondaryColor;
+            ctx.fillRect(fx - breathingRadius * 0.5, fy - breathingRadius * 0.5, breathingRadius, breathingRadius);
+        }
+        ctx.restore();
+    }
+
+    setInterval(() => { updatePhysicsEngine(); renderGraphicsEngine(); }, 115);
+
+    window.addEventListener('keydown', e => {
+        if(appState !== 'PLAYING') return;
+        if(e.key === "ArrowLeft" && vel.x !== 1) nextVel = {x: -1, y: 0};
+        if(e.key === "ArrowUp" && vel.y !== 1) nextVel = {x: 0, y: -1};
+        if(e.key === "ArrowRight" && vel.x !== -1) nextVel = {x: 1, y: 0};
+        if(e.key === "ArrowDown" && vel.y !== -1) nextVel = {x: 0, y: 1};
+    });
+
+    let xDown = null, yDown = null;
+    document.addEventListener('touchstart', e => { xDown = e.touches[0].clientX; yDown = e.touches[0].clientY; }, {passive: true});
+    document.addEventListener('touchmove', e => {
+        if(!xDown || !yDown || appState !== 'PLAYING') return;
+        let xDiff = xDown - e.touches[0].clientX, yDiff = yDown - e.touches[0].clientY;
+        if(Math.abs(xDiff) > Math.abs(yDiff)) {
+            if(xDiff > 0 && vel.x !== 1) nextVel = {x: -1, y: 0}; else if(xDiff < 0 && vel.x !== -1) nextVel = {x: 1, y: 0};
+        } else {
+            if(yDiff > 0 && vel.y !== 1) nextVel = {x: 0, y: -1}; else if(yDiff < 0 && vel.y !== -1) nextVel = {x: 0, y: 1};
+        }
+        xDown = null; yDown = null;
+    }, {passive: true});
+
+    lucide.createIcons();
+</script>
 </body>
 </html>
