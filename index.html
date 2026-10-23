@@ -10,13 +10,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Secure Gallery">
     
-    <!-- Manifest (1 File me App Install ke liye) -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Secure Gallery","short_name":"Gallery","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
+    <!-- Manifest Link -->
+    <link rel="manifest" href="manifest.json">
 
     <title>Secure App</title>
     <style>
         /* ==========================================
-           HARDCORE APP CSS (No Selection / No Drag)
+           HARDCORE APP CSS
            ========================================== */
         * {
             margin: 0;
@@ -24,14 +24,13 @@
             box-sizing: border-box;
             -webkit-touch-callout: none !important;
             -webkit-user-select: none !important; 
-            -khtml-user-select: none !important;
             -moz-user-select: none !important;
             -ms-user-select: none !important;
             user-select: none !important;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #0f172a;
             color: #fff;
             height: 100vh;
@@ -39,60 +38,74 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Mobile App feel */
             touch-action: none; 
         }
 
         /* ==========================================
-           SCREEN 1: HOME (App Grid Style)
+           SCREEN 1: HOME (3 Images Grid)
            ========================================== */
         #home-screen {
             width: 100%;
             height: 100%;
-            padding: 24px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            align-content: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
             max-width: 600px;
             margin: 0 auto;
+        }
+
+        /* App Title */
+        .app-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
         }
 
         .home-card {
             position: relative;
             width: 100%;
-            aspect-ratio: 1 / 1;
-            border-radius: 20px;
+            aspect-ratio: 16 / 9; /* Landscape for better preview */
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             cursor: pointer;
             border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23222"/></svg>');
+            transition: transform 0.2s;
+            background: #1e293b;
         }
 
         .home-card:active {
-            transform: scale(0.95);
+            transform: scale(0.97);
         }
 
         .home-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: blur(12px);
+            filter: blur(10px); /* Hide actual image */
             pointer-events: none;
             -webkit-user-drag: none;
+            transition: filter 0.3s;
+        }
+
+        .home-card:hover img {
+            filter: blur(5px); /* Slight reveal on hover */
         }
 
         .home-card::after {
-            content: '🔒 Locked';
+            content: '🔒 Tap to Unlock';
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(5px);
-            padding: 8px 16px; border-radius: 30px;
-            font-size: 13px; font-weight: 600; white-space: nowrap;
+            padding: 10px 20px; border-radius: 30px;
+            font-size: 14px; font-weight: 600; white-space: nowrap;
             border: 1px solid rgba(255,255,255,0.2);
         }
 
@@ -106,20 +119,18 @@
             z-index: 100;
             display: none;
             flex-direction: column;
-            opacity: 0;
         }
 
         #viewer-screen.active {
             display: flex;
-            animation: appOpenAnimation 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: appOpenAnimation 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         @keyframes appOpenAnimation {
-            0% { opacity: 0; transform: scale(0.8); filter: blur(10px); }
-            100% { opacity: 1; transform: scale(1); filter: blur(0px); }
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
-        /* App Header Bar */
         .app-header {
             position: absolute;
             top: 0; left: 0; width: 100%;
@@ -127,44 +138,40 @@
             display: flex;
             justify-content: flex-end;
             z-index: 200;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
 
         .close-btn {
-            width: 40px; height: 40px;
+            width: 44px; height: 44px;
             background: rgba(255,255,255,0.2);
             border: none; border-radius: 50%; color: #fff;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             backdrop-filter: blur(10px);
         }
 
-        .close-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .close-btn svg { width: 22px; height: 22px; fill: currentColor; }
 
-        /* Image Container */
         .image-container {
             position: relative;
             width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
-            padding: 20px;
+            padding: 15px;
         }
 
         .image-wrapper {
             position: relative;
-            width: 100%; max-width: 500px;
-            aspect-ratio: 1 / 1;
-            border-radius: 16px;
+            width: 100%; max-width: 600px;
+            aspect-ratio: auto;
+            border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             background: #111;
-            isolation: isolate; 
         }
 
         .actual-image {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover;
+            width: 100%;
+            height: auto;
+            display: block;
             pointer-events: none !important; 
-            -webkit-user-drag: none;
         }
 
         #scratch-canvas {
@@ -187,34 +194,17 @@
             animation: pulseHint 1.5s infinite;
         }
 
-        @keyframes pulseHint {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.7; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-
         /* ==========================================
            SECURITY SCREENS
            ========================================== */
-        #security-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+        #security-overlay, #blur-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999;
             display: none; align-items: center; justify-content: center;
-            flex-direction: column; color: #fff; text-align: center; padding: 20px;
+            flex-direction: column; color: #ef4444; text-align: center;
         }
-        #security-overlay.active { display: flex; }
+        #security-overlay.active, #blur-overlay.active { display: flex; }
         #security-overlay svg { width: 60px; height: 60px; fill: #ef4444; margin-bottom: 20px; }
-
-        #blur-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9998;
-            display: none; align-items: center; justify-content: center;
-            color: #ef4444; font-weight: 800; font-size: 18px;
-            letter-spacing: 2px; text-transform: uppercase;
-        }
-        #blur-overlay.active { display: flex; }
 
     </style>
 </head>
@@ -222,21 +212,25 @@
 
     <!-- SCREEN 1: HOME -->
     <div id="home-screen">
-        <div class="home-card" onclick="openViewer('https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=800')">
-            <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=800" alt="card1">
+        <div class="app-title">🔐 Secure Gallery</div>
+        
+        <!-- Card 1 -->
+        <div class="home-card" onclick="openViewer('https://i.ibb.co/6cTx59Q8/image1.jpg')">
+            <img src="https://i.ibb.co/6cTx59Q8/image1.jpg" alt="card1">
         </div>
-        <div class="home-card" onclick="openViewer('https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?q=80&w=800')">
-            <img src="https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?q=80&w=800" alt="card2">
+        
+        <!-- Card 2 -->
+        <div class="home-card" onclick="openViewer('https://i.ibb.co/cK2ckQc8/image2.jpg')">
+            <img src="https://i.ibb.co/cK2ckQc8/image2.jpg" alt="card2">
         </div>
-        <div class="home-card" onclick="openViewer('https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?q=80&w=800')">
-            <img src="https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?q=80&w=800" alt="card3">
-        </div>
-        <div class="home-card" onclick="openViewer('https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=800')">
-            <img src="https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=800" alt="card4">
+        
+        <!-- Card 3 -->
+        <div class="home-card" onclick="openViewer('https://i.ibb.co/NnLBPQvf/image3.jpg')">
+            <img src="https://i.ibb.co/NnLBPQvf/image3.jpg" alt="card3">
         </div>
     </div>
 
-    <!-- SCREEN 2: FULLSCREEN VIEWER -->
+    <!-- SCREEN 2: VIEWER -->
     <div id="viewer-screen">
         <div class="app-header">
             <button class="close-btn" onclick="closeViewer()">
@@ -248,9 +242,7 @@
             <div class="image-wrapper">
                 <img id="full-img" class="actual-image" src="" alt="protected">
                 <canvas id="scratch-canvas"></canvas>
-                <div class="scratch-hint" id="hint-text">
-                    ✨ Scratch to reveal
-                </div>
+                <div class="scratch-hint" id="hint-text">✨ Scratch to reveal</div>
             </div>
         </div>
     </div>
@@ -259,7 +251,7 @@
     <div id="security-overlay">
         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.48 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
         <h2>Security Alert!</h2>
-        <p style="margin-top:10px; color:#aaa;">App requires secure environment. Screenshot/Print blocked.</p>
+        <p style="margin-top:10px; color:#aaa;">Screenshot/Print blocked.</p>
     </div>
 
     <div id="blur-overlay">
@@ -268,9 +260,8 @@
 
 <script>
     /* ==========================================
-       APP LOGIC (Scratch & Security)
+       APP LOGIC
        ========================================== */
-
     const viewer = document.getElementById('viewer-screen');
     const canvas = document.getElementById('scratch-canvas');
     const ctx = canvas.getContext('2d');
@@ -282,22 +273,21 @@
     let isRevealed = false;
     let lastPos = null;
 
-    // Open Viewer
     function openViewer(imgUrl) {
         fullImg.src = imgUrl;
         viewer.style.display = 'flex';
         setTimeout(() => {
             viewer.classList.add('active');
-            initCanvas();
-        }, 10);
+            // Wait for image to load to get correct dimensions
+            fullImg.onload = () => { initCanvas(); };
+        }, 50);
     }
 
-    // Close Viewer
     function closeViewer() {
         viewer.classList.remove('active');
         setTimeout(() => {
             viewer.style.display = 'none';
-            fullImg.src = ""; // DOM Clear for security
+            fullImg.src = ""; 
             isRevealed = false;
             canvas.style.opacity = '1';
             canvas.style.display = 'block';
@@ -305,7 +295,6 @@
         }, 300);
     }
 
-    // Canvas Init
     function initCanvas() {
         const wrapper = document.querySelector('.image-wrapper');
         canvas.width = wrapper.offsetWidth;
@@ -328,12 +317,11 @@
         }
 
         ctx.globalCompositeOperation = 'destination-out';
-        ctx.lineWidth = 45; // Thicker for touch
+        ctx.lineWidth = 40;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
     }
 
-    // Scratch Logic
     function getPointerPos(e) {
         const rect = canvas.getBoundingClientRect();
         let clientX, clientY;
@@ -401,18 +389,12 @@
     canvas.addEventListener('touchmove', scratchSmooth, { passive: false });
     window.addEventListener('touchend', stopScratch);
 
-
     /* ==========================================
-       HARDCORE APP SECURITY (PWA LEVEL)
+       SECURITY & APP INSTALL LOGIC
        ========================================== */
-
-    // Block Context Menu
     document.addEventListener('contextmenu', e => e.preventDefault());
-
-    // Block Drag
     document.addEventListener('dragstart', e => e.preventDefault());
 
-    // Block Keyboard Shortcuts
     document.addEventListener('keydown', function(e) {
         if (
             (e.ctrlKey && ['s','S','p','P','u','U'].includes(e.key)) ||
@@ -423,33 +405,17 @@
             showSecurityWarning();
             return false;
         }
-
-        // Print Screen Alert
         if (e.key === 'PrintScreen' || e.keyCode === 44) {
             e.preventDefault();
             showSecurityWarning();
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText('Screenshot Blocked by Secure App!');
-            }
-            return false;
         }
     });
 
-    // Focus Blur (Anti-Screen Recording & Snipping)
     window.addEventListener('blur', function() {
         if(viewer.classList.contains('active')) blurOverlay.classList.add('active');
     });
-
     window.addEventListener('focus', function() {
         blurOverlay.classList.remove('active');
-    });
-
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden && viewer.classList.contains('active')) {
-            blurOverlay.classList.add('active');
-        } else {
-            blurOverlay.classList.remove('active');
-        }
     });
 
     function showSecurityWarning() {
@@ -458,14 +424,12 @@
         setTimeout(() => overlay.classList.remove('active'), 2500);
     }
 
-    // Register Service Worker for PWA (Offline & App Mode)
+    // 🔥 REGISTER SERVICE WORKER (Yahi App Install button laayega)
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            // Simple inline service worker for PWA requirement
-            const swCode = `self.addEventListener('fetch', function(event) {});`;
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl).catch(err => console.log('SW err:', err));
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                console.log('App Install Ready! SW Registered.');
+            }).catch(err => console.log('SW error:', err));
         });
     }
 </script>
