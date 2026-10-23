@@ -18,35 +18,28 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent !important; /* Mobile blue tap remove */
-            -webkit-touch-callout: none !important; /* iOS long press remove */
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-touch-callout: none !important;
             -webkit-user-select: none !important; 
             -moz-user-select: none !important;
             -ms-user-select: none !important;
             user-select: none !important;
         }
 
-        /* Text ya image select hone par blue highlight na aaye */
-        ::selection {
-            background: transparent;
-            color: inherit;
-        }
-        ::-moz-selection {
-            background: transparent;
-            color: inherit;
-        }
+        ::selection { background: transparent; color: inherit; }
+        ::-moz-selection { background: transparent; color: inherit; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #0f172a;
             color: #fff;
-            height: 100vh;
+            height: 100dvh; /* Mobile dynamic viewport height */
             overflow: hidden;
             outline: none;
         }
 
         /* ==========================================
-           SCREEN 1: HOME
+           SCREEN 1: HOME (Responsive Grid)
            ========================================== */
         #home-screen {
             width: 100%;
@@ -57,7 +50,7 @@
             align-items: center;
             justify-content: center;
             gap: 20px;
-            max-width: 600px;
+            max-width: 600px; /* Desktop par center me rahega */
             margin: 0 auto;
             overflow-y: auto;
             transition: opacity 0.3s;
@@ -111,7 +104,7 @@
            ========================================== */
         #viewer-screen {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0; width: 100%; height: 100dvh;
             background: #000;
             z-index: 100;
             display: none;
@@ -143,36 +136,45 @@
 
         .close-btn svg { width: 22px; height: 22px; fill: currentColor; }
 
-        /* 🔥 HD IMAGE CONTAINER (Scrollable) */
+        /* 🔥 FIXED RESPONSIVE IMAGE CONTAINER */
         .image-container {
             position: relative;
-            width: 100%; height: 100%;
-            overflow: auto; 
+            width: 100%; 
+            height: 100%;
             display: flex;
-            -webkit-overflow-scrolling: touch; 
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Image screen se bahar nahi jayegi */
+            padding: 10px; /* Thoda gap screen ke edges se */
         }
 
+        /* Zoom wrapper */
         .image-wrapper {
             position: relative;
-            margin: auto; 
             display: flex;
             align-items: center;
             justify-content: center;
             transition: transform 0.2s ease-out; 
             transform-origin: center center;
+            /* Responsive limits */
+            max-width: 100%;
+            max-height: 100%;
         }
 
         .actual-image {
             display: block;
             width: auto;
             height: auto;
-            max-width: 100vw; 
-            max-height: 100vh;
+            /* 🔥 IMAGE RESPONSIVE FIX: Screen ke andar fit hogi */
+            max-width: 100%;
+            max-height: calc(100dvh - 20px); /* Screen height minus padding */
             object-fit: contain;
             pointer-events: none !important; 
             -webkit-user-drag: none;
+            border-radius: 8px;
         }
 
+        /* Canvas image ke upar perfectly fit */
         #scratch-canvas {
             position: absolute;
             top: 0; left: 0;
@@ -181,6 +183,7 @@
             cursor: crosshair;
             touch-action: none;
             outline: none;
+            border-radius: 8px;
         }
 
         .scratch-hint {
@@ -191,6 +194,7 @@
             padding: 10px 20px; border-radius: 30px;
             font-size: 14px; font-weight: 600;
             pointer-events: none; z-index: 20;
+            white-space: nowrap;
         }
 
         /* 🔥 ZOOM CONTROLS */
@@ -217,7 +221,6 @@
             backdrop-filter: blur(10px);
             transition: background 0.2s, transform 0.1s;
             outline: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
         .zoom-btn:active {
@@ -231,9 +234,19 @@
             background: #000; z-index: 9999;
             display: none; align-items: center; justify-content: center;
             flex-direction: column; color: #ef4444; text-align: center;
+            padding: 20px;
         }
         #security-overlay.active, #blur-overlay.active { display: flex; }
         #security-overlay svg { width: 60px; height: 60px; fill: #ef4444; margin-bottom: 20px; }
+
+        /* ==========================================
+           MOBILE RESPONSIVE
+           ========================================== */
+        @media (max-width: 480px) {
+            .home-card { height: 160px; }
+            .zoom-btn { width: 40px; height: 40px; font-size: 18px; }
+            .app-title { font-size: 18px; }
+        }
 
     </style>
 </head>
@@ -301,7 +314,6 @@
     let isRevealed = false;
     let lastPos = null;
 
-    // ZOOM VARIABLES
     let currentScale = 1;
     const maxScale = 4; 
     const minScale = 1; 
@@ -331,9 +343,11 @@
     }
 
     function initCanvas() {
+        // Image ke actual (HD) pixels
         canvas.width = fullImg.naturalWidth;
         canvas.height = fullImg.naturalHeight;
 
+        // Canvas ko CSS se exactly image ke size ka karo
         canvas.style.width = '100%';
         canvas.style.height = '100%';
 
@@ -473,13 +487,21 @@
     canvas.addEventListener('touchmove', scratchSmooth, { passive: false });
     window.addEventListener('touchend', stopScratch);
 
-    // Security Features
+    /* ==========================================
+       🔥 ULTIMATE SECURITY + PWA LOGIC
+       ========================================== */
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('dragstart', e => e.preventDefault());
+
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey && ['s','S','p','P','u','U'].includes(e.key)) || e.key === 'F12') {
             e.preventDefault();
             showSecurityWarning();
+        }
+        if (e.key === 'PrintScreen' || e.keyCode === 44) {
+            e.preventDefault();
+            showSecurityWarning();
+            if (navigator.clipboard) navigator.clipboard.writeText('🚫 Screenshot blocked!');
         }
     });
 
@@ -489,6 +511,13 @@
     window.addEventListener('focus', function() {
         blurOverlay.classList.remove('active');
     });
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && viewer.classList.contains('active')) {
+            blurOverlay.classList.add('active');
+        } else {
+            blurOverlay.classList.remove('active');
+        }
+    });
 
     function showSecurityWarning() {
         const overlay = document.getElementById('security-overlay');
@@ -496,8 +525,9 @@
         setTimeout(() => overlay.classList.remove('active'), 2500);
     }
 
+    // Service Worker for App Install
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW err', err));
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW err', err));
     }
 </script>
 </body>
