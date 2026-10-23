@@ -8,12 +8,10 @@
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Secure Gallery">
     
-    <!-- Manifest Link -->
     <link rel="manifest" href="manifest.json">
-
     <title>Secure App</title>
+
     <style>
         * {
             margin: 0;
@@ -21,8 +19,6 @@
             box-sizing: border-box;
             -webkit-touch-callout: none !important;
             -webkit-user-select: none !important; 
-            -moz-user-select: none !important;
-            -ms-user-select: none !important;
             user-select: none !important;
         }
 
@@ -32,14 +28,10 @@
             color: #fff;
             height: 100vh;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: none; 
         }
 
         /* ==========================================
-           SCREEN 1: HOME (3 Images)
+           SCREEN 1: HOME
            ========================================== */
         #home-screen {
             width: 100%;
@@ -53,6 +45,7 @@
             max-width: 600px;
             margin: 0 auto;
             overflow-y: auto;
+            transition: opacity 0.3s;
         }
 
         .app-title {
@@ -65,7 +58,7 @@
         .home-card {
             position: relative;
             width: 100%;
-            height: 200px; /* Card ki height fix hai home screen par */
+            height: 200px; 
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
@@ -76,9 +69,7 @@
             flex-shrink: 0;
         }
 
-        .home-card:active {
-            transform: scale(0.97);
-        }
+        .home-card:active { transform: scale(0.97); }
 
         .home-card img {
             width: 100%;
@@ -100,7 +91,7 @@
         }
 
         /* ==========================================
-           SCREEN 2: FULLSCREEN SECURE VIEWER
+           SCREEN 2: FULLSCREEN VIEWER
            ========================================== */
         #viewer-screen {
             position: fixed;
@@ -111,9 +102,7 @@
             flex-direction: column;
         }
 
-        #viewer-screen.active {
-            display: flex;
-        }
+        #viewer-screen.active { display: flex; }
 
         .app-header {
             position: absolute;
@@ -122,7 +111,8 @@
             display: flex;
             justify-content: flex-end;
             z-index: 200;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            pointer-events: none;
         }
 
         .close-btn {
@@ -131,44 +121,45 @@
             border: none; border-radius: 50%; color: #fff;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             backdrop-filter: blur(10px);
+            pointer-events: auto;
         }
 
         .close-btn svg { width: 22px; height: 22px; fill: currentColor; }
 
-        /* 🔥 Yaha Image FULL dikhegi (No Limit) */
+        /* 🔥 HD IMAGE CONTAINER (Scrollable & No Quality Loss) */
         .image-container {
             position: relative;
-            width: 100%; 
-            height: 100%;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            overflow: auto; /* Agar image screen se badi ho toh scroll ho sake */
+            width: 100%; height: 100%;
+            overflow: auto; 
+            display: flex;
+            -webkit-overflow-scrolling: touch; 
         }
 
         .image-wrapper {
             position: relative;
-            /* Image apna natural size legi */
-            max-width: 100%;
-            max-height: 100%;
-            display: inline-block;
-            background: #000;
+            margin: auto; 
+            min-width: 100%;
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .actual-image {
             display: block;
-            max-width: 100vw;
-            max-height: 100vh;
             width: auto;
             height: auto;
-            object-fit: contain; /* Full image bina stretch huye */
+            max-width: none; 
+            max-height: none;
+            object-fit: contain;
             pointer-events: none !important; 
         }
 
+        /* Canvas exact image ke upar perfectly baithta hai */
         #scratch-canvas {
             position: absolute;
-            top: 0; left: 0; 
-            width: 100%; height: 100%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 10;
             cursor: crosshair;
             touch-action: none;
@@ -193,7 +184,6 @@
         }
         #security-overlay.active, #blur-overlay.active { display: flex; }
         #security-overlay svg { width: 60px; height: 60px; fill: #ef4444; margin-bottom: 20px; }
-
     </style>
 </head>
 <body>
@@ -202,16 +192,19 @@
     <div id="home-screen">
         <div class="app-title">🔐 Secure Gallery</div>
         
-        <div class="home-card" onclick="openViewer('https://i.ibb.co/6cTx59Q8/image1.jpg')">
-            <img src="https://i.ibb.co/6cTx59Q8/image1.jpg" alt="card1">
+        <!-- Card 1: b1.jpg -->
+        <div class="home-card" onclick="openViewer('https://raw.githubusercontent.com/rajmusaic/GhostFiles/main/b1.jpg')">
+            <img src="https://raw.githubusercontent.com/rajmusaic/GhostFiles/main/b1.jpg" alt="card1">
         </div>
         
-        <div class="home-card" onclick="openViewer('https://i.ibb.co/cK2ckQc8/image2.jpg')">
-            <img src="https://i.ibb.co/cK2ckQc8/image2.jpg" alt="card2">
+        <!-- Card 2: b2.jpg -->
+        <div class="home-card" onclick="openViewer('https://raw.githubusercontent.com/rajmusaic/GhostFiles/main/b2.jpg')">
+            <img src="https://raw.githubusercontent.com/rajmusaic/GhostFiles/main/b2.jpg" alt="card2">
         </div>
         
-        <div class="home-card" onclick="openViewer('https://i.ibb.co/NnLBPQvf/image3.jpg')">
-            <img src="https://i.ibb.co/NnLBPQvf/image3.jpg" alt="card3">
+        <!-- Card 3: b3.jpg -->
+        <div class="home-card" onclick="openViewer('https://raw.githubusercontent.com/rajmusaic/GhostFiles/main/b3.jpg')">
+            <img src="https://raw.githubusercontent.com/rajmusaic/GhostFiles/main/b3.jpg" alt="card3">
         </div>
     </div>
 
@@ -223,8 +216,7 @@
             </button>
         </div>
 
-        <div class="image-container">
-            <!-- Image wrapper apna size image ke hisaab se lega -->
+        <div class="image-container" id="img-container">
             <div class="image-wrapper" id="img-wrapper">
                 <img id="full-img" class="actual-image" src="" alt="protected">
                 <canvas id="scratch-canvas"></canvas>
@@ -240,9 +232,7 @@
         <p style="margin-top:10px; color:#aaa;">Screenshot/Print blocked.</p>
     </div>
 
-    <div id="blur-overlay">
-        ⚠️ APP LOCKED
-    </div>
+    <div id="blur-overlay">⚠️ APP LOCKED</div>
 
 <script>
     const viewer = document.getElementById('viewer-screen');
@@ -261,7 +251,7 @@
         fullImg.src = imgUrl;
         viewer.style.display = 'flex';
         
-        // Image load hone ka wait karo, taaki canvas ka size perfect set ho
+        // Jab image pura load ho jaye, tabhi canvas banayein
         fullImg.onload = function() {
             viewer.classList.add('active');
             initCanvas();
@@ -281,11 +271,17 @@
     }
 
     function initCanvas() {
-        // Canvas ka size exactly image ke size ke barabar set karo
-        canvas.width = imgWrapper.offsetWidth;
-        canvas.height = imgWrapper.offsetHeight;
+        // Canvas ka exact size original HD image ke size ke barabar set karo
+        canvas.width = fullImg.naturalWidth;
+        canvas.height = fullImg.naturalHeight;
+
+        // Canvas ko image ke upar perfectly align karo
+        canvas.style.width = fullImg.offsetWidth + 'px';
+        canvas.style.height = fullImg.offsetHeight + 'px';
 
         ctx.globalCompositeOperation = 'source-over';
+        
+        // Silver scratch effect
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         gradient.addColorStop(0, '#9ca3af');
         gradient.addColorStop(0.5, '#e5e7eb');
@@ -294,17 +290,19 @@
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Scratch effect ke liye texture
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        for(let i=0; i<canvas.width; i+=4) {
-            for(let j=0; j<canvas.height; j+=4) {
-                if(Math.random() > 0.5) ctx.fillRect(i, j, 2, 2);
+        // Texture
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        for(let i=0; i<canvas.width; i+=8) {
+            for(let j=0; j<canvas.height; j+=8) {
+                if(Math.random() > 0.5) ctx.fillRect(i, j, 3, 3);
             }
         }
 
-        // Erase mode (jahan ungli lagegi wahan se gray hat jayega)
+        // Scratch Mode (Erase)
         ctx.globalCompositeOperation = 'destination-out';
-        ctx.lineWidth = 45;
+        
+        // Line width ko image size ke hisaab se adjust karo
+        ctx.lineWidth = Math.max(40, canvas.width * 0.05); 
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
     }
@@ -319,7 +317,8 @@
             clientX = e.clientX;
             clientY = e.clientY;
         }
-        // Scale calculation (agar image screen se badi ho)
+        
+        // Scale ratio nikalna zaroori hai kyunki image screen se badi ho sakti hai
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
         
@@ -363,15 +362,17 @@
         let clearPixels = 0;
         const totalPixels = pixels.length / 4;
 
-        for (let i = 3; i < pixels.length; i += 4 * 10) {
+        for (let i = 3; i < pixels.length; i += 4 * 15) {
             if (pixels[i] === 0) clearPixels++;
         }
-        const clearPercent = (clearPixels / (totalPixels / 10)) * 100;
-        if (clearPercent > 40) revealFull(); // 40% scratch hone par full open
+        const clearPercent = (clearPixels / (totalPixels / 15)) * 100;
+        
+        if (clearPercent > 40) revealFull();
     }
 
     function revealFull() {
         isRevealed = true;
+        canvas.style.transition = 'opacity 0.5s ease';
         canvas.style.opacity = '0';
         setTimeout(() => { canvas.style.display = 'none'; }, 500);
     }
@@ -406,7 +407,6 @@
         setTimeout(() => overlay.classList.remove('active'), 2500);
     }
 
-    // Service worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(err => console.log('SW err', err));
     }
